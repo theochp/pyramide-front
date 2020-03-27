@@ -34,14 +34,18 @@
 
       },
       gameActionRequest(data) {
-        console.log('request',data)
+        let res = window.prompt('Rouge ou noir ?')
+        if (res === 'noir')
+          res = 'DEAL_1_RESPONSE_BLACK'
+        else
+          res = 'DEAL_1_RESPONSE_RED'
         this.$socket.emit('gameActionResponse', {
           responseToken: data.responseToken,
-          response: 'DEAL_1_RESPONSE_BLACK'
+          response: res
         })
       },
-      gameActionResponse() {
-
+      gameActionResponse(response) {
+        console.log(response)
       }
     },
     mounted() {
