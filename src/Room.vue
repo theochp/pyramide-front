@@ -1,6 +1,12 @@
 <template>
   <div class="room">
     Test
+    <button
+      v-if="isAdmin"
+      @click="startGame"
+    >
+      Démarrer la partie
+    </button>
   </div>
 </template>
 
@@ -9,8 +15,10 @@
     name: 'Room',
     data() {
       return {
+        room: null,
+        roomId: null,
         joiningRoom: false,
-        room: null
+        isAdmin: true
       }
     },
     sockets: {
@@ -18,18 +26,40 @@
         if(res.success)  {
           this.room = res.room
           this.joiningRoom = false
+        } else {
+          alert(res.message)
         }
+      },
+      gameUpdate() {
+
+      },
+      gameActionRequest(data) {
+        console.log('request',data)
+        this.$socket.emit('gameActionResponse', {
+          responseToken: data.responseToken,
+          response: 'DEAL_1_RESPONSE_BLACK'
+        })
+      },
+      gameActionResponse() {
+
       }
     },
     mounted() {
-      const roomId = this.$route.params.id
+      this.roomId = this.$route.params.id
       this.$socket.emit('joinRoom', {
-        roomId,
+        roomId: this.roomId,
         user: {
           name: 'theo'
         }
       })
       this.joiningRoom = true
+    },
+    methods: {
+      startGame() {
+        this.$socket.emit('startGame', {
+          roomId: this.roomId
+        })
+      }
     }
   }
 </script>
