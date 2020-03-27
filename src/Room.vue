@@ -34,15 +34,28 @@
 
       },
       gameActionRequest(data) {
-        let res = window.prompt('Rouge ou noir ?')
-        if (res === 'noir')
-          res = 'DEAL_1_RESPONSE_BLACK'
-        else
-          res = 'DEAL_1_RESPONSE_RED'
-        this.$socket.emit('gameActionResponse', {
-          responseToken: data.responseToken,
-          response: res
-        })
+        if (data['gameRequest'] === 'DEAL_1_RED_OR_BLACK') {
+          let res = window.prompt('Rouge ou noir ?')
+          if (res === 'noir')
+            res = 'DEAL_1_RESPONSE_BLACK'
+          else
+            res = 'DEAL_1_RESPONSE_RED'
+          this.$socket.emit('gameActionResponse', {
+            responseToken: data.responseToken,
+            response: res
+          })
+        } else if(data['gameRequest'] === 'DEAL_2_MORE_OR_LESS') {
+          let res = window.prompt('Plus ou moins ?')
+          if (res === 'plus')
+            res = 'DEAL_2_MORE'
+          else
+            res = 'DEAL_2_LESS'
+          this.$socket.emit('gameActionResponse', {
+            responseToken: data.responseToken,
+            response: res
+          })
+        }
+
       },
       gameActionResponse(response) {
         console.log(response)
