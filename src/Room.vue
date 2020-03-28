@@ -1,29 +1,50 @@
 <template>
   <div class="room">
-    Test
+    {{ sips }} gorgées
+    Cartes:
+    <ul>
+      <li v-for="card in cards" :key="card.suit+card.value">
+        {{ card.value}} + {{ card.suit }}
+      </li>
+    </ul>
     <button
       v-if="isAdmin"
       @click="startGame"
     >
       Démarrer la partie
     </button>
+    <deal1 v-if="gameComponentDisplay.deal1"/>
   </div>
 </template>
 
 <script>
+  import Deal1 from '@/components/game/phases/deal1'
+
   export default {
     name: 'Room',
+    components: { Deal1 },
     data() {
       return {
         room: null,
         roomId: null,
         joiningRoom: false,
-        isAdmin: true
+        isAdmin: true,
       }
+    },
+    computed: {
+      gameComponentDisplay() {
+        return this.$store.state.gameComponentDisplay
+      },
+      sips() {
+        return this.$store.state.sips
+      },
+      cards() {
+        return this.$store.state.cards
+      },
     },
     sockets: {
       joinRoomResponse(res) {
-        if(res.success)  {
+        if (res.success) {
           this.room = res.room
           this.joiningRoom = false
         } else {
@@ -34,50 +55,30 @@
 
       },
       gameActionRequest(data) {
-        if (data['gameRequest'] === 'DEAL_1_RED_OR_BLACK') {
-          let res = window.prompt('Rouge ou noir ?')
-          if (res === 'noir')
-            res = 'DEAL_1_RESPONSE_BLACK'
-          else
-            res = 'DEAL_1_RESPONSE_RED'
-          this.$socket.emit('gameActionResponse', {
-            responseToken: data.responseToken,
-            response: res
-          })
-        } else if(data['gameRequest'] === 'DEAL_2_MORE_OR_LESS') {
-          let res = window.prompt('Plus ou moins ?')
-          if (res === 'plus')
-            res = 'DEAL_2_MORE'
-          else
-            res = 'DEAL_2_LESS'
-          this.$socket.emit('gameActionResponse', {
-            responseToken: data.responseToken,
-            response: res
-          })
-        }
-
+        this.$store.dispatch('handleGameRequest', data)
       },
-      gameActionResponse(response) {
-        console.log(response)
-      }
+      gameActionResponse(data) {
+        this.$store.dispatch('handleGameResponse', data)
+      },
     },
     mounted() {
       this.roomId = this.$route.params.id
       this.$socket.emit('joinRoom', {
         roomId: this.roomId,
         user: {
-          name: 'theo'
-        }
+          name: 'theo',
+        },
       })
       this.joiningRoom = true
+      console.log(this.gameComponentDisplay)
     },
     methods: {
       startGame() {
         this.$socket.emit('startGame', {
-          roomId: this.roomId
+          roomId: this.roomId,
         })
-      }
-    }
+      },
+    },
   }
 </script>
 
