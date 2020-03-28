@@ -1,10 +1,11 @@
 <template>
   <div class="room">
+    <img src="@/assets/cards/back_cards-07.png" alt="back cards" width="300" height="auto">
     {{ sips }} gorgées
     Cartes:
-    <ul>
+    <ul class="cards">
       <li v-for="card in cards" :key="card.suit+card.value">
-        {{ card.value}} + {{ card.suit }}
+        <card :card="card" height="200" width="auto"/>
       </li>
     </ul>
     <button
@@ -25,10 +26,11 @@
   import Deal2 from '@/components/game/phases/deal2'
   import Deal3 from '@/components/game/phases/deal3'
   import Deal4 from '@/components/game/phases/deal4'
+  import Card from '@/components/game/card'
 
   export default {
     name: 'Room',
-    components: { Deal1, Deal2, Deal3, Deal4 },
+    components: { Card, Deal1, Deal2, Deal3, Deal4 },
     data() {
       return {
         room: null,
@@ -89,6 +91,13 @@
   }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.cards {
+  text-align: left;
 
+  li {
+    display: inline-block;
+    list-style: none;
+  }
+}
 </style>
