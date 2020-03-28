@@ -8,27 +8,34 @@
       </li>
     </ul>
     <button
-      v-if="isAdmin"
+      v-if="isAdmin && !gameStarted"
       @click="startGame"
     >
       Démarrer la partie
     </button>
     <deal1 v-if="gameComponentDisplay.deal1"/>
+    <deal2 v-if="gameComponentDisplay.deal2"/>
+    <deal3 v-if="gameComponentDisplay.deal3"/>
+    <deal4 v-if="gameComponentDisplay.deal4"/>
   </div>
 </template>
 
 <script>
   import Deal1 from '@/components/game/phases/deal1'
+  import Deal2 from '@/components/game/phases/deal2'
+  import Deal3 from '@/components/game/phases/deal3'
+  import Deal4 from '@/components/game/phases/deal4'
 
   export default {
     name: 'Room',
-    components: { Deal1 },
+    components: { Deal1, Deal2, Deal3, Deal4 },
     data() {
       return {
         room: null,
         roomId: null,
         joiningRoom: false,
         isAdmin: true,
+        gameStarted: false,
       }
     },
     computed: {
@@ -70,10 +77,10 @@
         },
       })
       this.joiningRoom = true
-      console.log(this.gameComponentDisplay)
     },
     methods: {
       startGame() {
+        this.gameStarted = true
         this.$socket.emit('startGame', {
           roomId: this.roomId,
         })

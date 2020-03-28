@@ -7,11 +7,6 @@
 <script>
 export default {
   name: 'App',
-  sockets: {
-    connect() {
-      console.log('socket connected')
-    }
-  },
 }
 </script>
 
