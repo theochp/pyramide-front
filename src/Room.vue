@@ -13,7 +13,7 @@
       Cartes:
       <ul class="cards">
         <li v-for="card in cards" :key="card.suit+card.value">
-          <card :card="card" height="200" width="auto"/>
+          <Card :card="card" class="card"/>
         </li>
       </ul>
       <button
@@ -26,6 +26,10 @@
       <deal2 v-if="gamePhase === constants.GAME_PHASE_DEAL_2"/>
       <deal3 v-if="gamePhase === constants.GAME_PHASE_DEAL_3"/>
       <deal4 v-if="gamePhase === constants.GAME_PHASE_DEAL_4"/>
+      <h2>Board</h2>
+      <div class="board">
+        <Card v-for="card in board" :card="card" :key="card.value+card.suit" class="card"/>
+      </div>
     </div>
   </div>
 </template>
@@ -49,6 +53,7 @@
         isAdmin: true,
         gameStarted: false,
         username: null,
+        board: []
       }
     },
     computed: {
@@ -78,9 +83,10 @@
         this.$store.commit('addUser', data.user)
       },
       gameUpdate(data) {
-        console.log(data)
         if (data.type === Constants.GAME_UPDATE_GAME_PHASE) {
           this.$store.commit('updateGamePhase', data.payload.gamePhase)
+        } else if (data.type === Constants.GAME_UPDATE_NEW_CARD) {
+          this.board.push(data.payload.card)
         }
       },
       gameActionRequest(data) {
@@ -110,16 +116,36 @@
         this.joiningRoom = true
       },
     },
+    watch: {
+      gamePhase(newVal) {
+        if (newVal === Constants.GAME_PHASE_REMEMBER_CARDS) {
+          alert('Remember your cards! ' + Constants.SECONDS_TO_REMEMBER +  ' seconds.')
+        } else if (newVal === Constants.GAME_PHASE_PLAY) {
+          console.log('play started')
+        }
+      }
+    }
   }
 </script>
 
 <style scoped lang="scss">
   .cards {
+    min-height: 200px;
     text-align: left;
+
+    .card {
+      width: auto;
+      height: 200px;
+    }
 
     li {
       display: inline-block;
       list-style: none;
+    }
+  }
+  .board {
+    .card {
+      width: 100px;
     }
   }
 </style>
