@@ -2,7 +2,7 @@
   <div class="game">
     <div class="rooms">
       <div v-for="room in rooms" :key="room.id" class="room">
-        {{ room.title }}
+        {{ room.name }}
         <router-link :to="'/room/' + room.id">Rejoindre</router-link>
       </div>
     </div>
