@@ -15,7 +15,7 @@
     data() {
       return {
         constants: Constants,
-        suit: null,
+        suit: Constants.CARD_SUITS[0],
       }
     },
     computed: {

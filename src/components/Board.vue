@@ -1,6 +1,6 @@
 <template>
   <div class="board">
-    <div v-for="i in rows" class="board-row" :key="'br'+i">
+    <div v-for="i in nRows" class="board-row" :key="'br'+i">
       <Card v-for="(card, idx) in getRowCards(i)" class="board-card" :key="'bc'+idx" :card="card"/>
     </div>
   </div>
@@ -15,8 +15,22 @@
     props: {
       cards: Array,
     },
-    computed: {
-      rows() {
+    data() {
+      return {
+        nRows: 0,
+        shownCards: 0
+      }
+    },
+    mounted() {
+      this.computeRows()
+    },
+    watch: {
+      cards() {
+        this.computeRows()
+      }
+    },
+    methods: {
+      computeRows() {
         const max = this.cards.length
         let n = 0
         let total = 0
@@ -26,16 +40,15 @@
           total += n
         }
 
-        return n
+        this.nRows = n
+        this.shownCards = total
       },
-    },
-    methods: {
       getRowCards(rowNum) {
         const startIdx = (rowNum - 1) * rowNum / 2
         const endIdx = startIdx + rowNum
         const cards = []
         for (let i = startIdx; i < endIdx; ++i) {
-          cards.push(this.cards[i])
+          cards.push(this.cards[this.shownCards - i - 1])
         }
         return cards
       },
@@ -47,6 +60,7 @@
   .board {
     .board-row {
       text-align: center;
+      direction: rtl;
     }
 
     .board-card {
