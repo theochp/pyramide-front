@@ -3,12 +3,7 @@ import dealHandler from '@/game/dealHandler'
 
 export default {
   state: {
-    gameComponentDisplay: {
-      deal1: false,
-      deal2: false,
-      deal3: false,
-      deal4: false,
-    },
+    gamePhase: null,
     responseTokens: new Map(),
     cards: [],
     sips: 0,
@@ -18,28 +13,28 @@ export default {
     handleGameRequest(context, requestData) {
       const request = requestData['gameRequest']
 
-      const commonGameData = {
-        socket: this._vm.$socket,
-        store: this,
-      }
+      // const commonGameData = {
+      //   socket: this._vm.$socket,
+      //   store: this,
+      // }
       this.commit('addResponseToken', {
         key: request,
         value: requestData['responseToken'],
       })
-      switch (request) {
-        case Constants.GAME_REQUEST_DEAL_1:
-          dealHandler.handlePhase1(commonGameData)
-          break
-        case Constants.GAME_REQUEST_DEAL_2:
-          dealHandler.handlePhase2(commonGameData)
-          break
-        case Constants.GAME_REQUEST_DEAL_3:
-          dealHandler.handlePhase3(commonGameData)
-          break
-        case Constants.GAME_REQUEST_DEAL_4:
-          dealHandler.handlePhase4(commonGameData)
-          break
-      }
+      // switch (request) {
+      //   case Constants.GAME_REQUEST_DEAL_1:
+      //     dealHandler.handlePhase1(commonGameData)
+      //     break
+      //   case Constants.GAME_REQUEST_DEAL_2:
+      //     dealHandler.handlePhase2(commonGameData)
+      //     break
+      //   case Constants.GAME_REQUEST_DEAL_3:
+      //     dealHandler.handlePhase3(commonGameData)
+      //     break
+      //   case Constants.GAME_REQUEST_DEAL_4:
+      //     dealHandler.handlePhase4(commonGameData)
+      //     break
+      // }
     },
     handleGameResponse(context, responseData) {
       const response = responseData['gameResponse']
@@ -54,8 +49,8 @@ export default {
         case Constants.GAME_RESPONSE_DEAL_1:
         case Constants.GAME_RESPONSE_DEAL_2:
         case Constants.GAME_RESPONSE_DEAL_3:
-        case Constants.GAME_RESPONSE_DEAL_4: // TODO: different thing for 4 (start next round)
-          dealHandler.handlePhase1To3Response(commonGameData, data)
+        case Constants.GAME_RESPONSE_DEAL_4:
+          dealHandler.handleDealPhases(commonGameData, data)
           break
       }
     },
@@ -67,11 +62,6 @@ export default {
     },
   },
   mutations: {
-    toggleGameComponent(state, componentName) {
-      if (state.gameComponentDisplay[componentName] !== undefined) {
-        state.gameComponentDisplay[componentName] = !state.gameComponentDisplay[componentName]
-      }
-    },
     addResponseToken(state, { key, value }) {
       state.responseTokens.set(key, value)
     },
@@ -83,6 +73,9 @@ export default {
     },
     addUser(state, user) {
       state.users.push(user)
+    },
+    updateGamePhase(state, phase) {
+      state.gamePhase = phase
     }
   },
 }

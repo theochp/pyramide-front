@@ -22,10 +22,10 @@
       >
         Démarrer la partie
       </button>
-      <deal1 v-if="gameComponentDisplay.deal1"/>
-      <deal2 v-if="gameComponentDisplay.deal2"/>
-      <deal3 v-if="gameComponentDisplay.deal3"/>
-      <deal4 v-if="gameComponentDisplay.deal4"/>
+      <deal1 v-if="gamePhase === constants.GAME_PHASE_DEAL_1"/>
+      <deal2 v-if="gamePhase === constants.GAME_PHASE_DEAL_2"/>
+      <deal3 v-if="gamePhase === constants.GAME_PHASE_DEAL_3"/>
+      <deal4 v-if="gamePhase === constants.GAME_PHASE_DEAL_4"/>
     </div>
   </div>
 </template>
@@ -36,6 +36,7 @@
   import Deal3 from '@/components/game/phases/deal3'
   import Deal4 from '@/components/game/phases/deal4'
   import Card from '@/components/game/card'
+  import Constants from '@/game/constants'
 
   export default {
     name: 'Room',
@@ -51,8 +52,8 @@
       }
     },
     computed: {
-      gameComponentDisplay() {
-        return this.$store.state.gameComponentDisplay
+      gamePhase() {
+        return this.$store.state.gamePhase
       },
       sips() {
         return this.$store.state.sips
@@ -60,6 +61,9 @@
       cards() {
         return this.$store.state.cards
       },
+      constants() {
+        return Constants
+      }
     },
     sockets: {
       joinRoomResponse(res) {
@@ -73,8 +77,11 @@
       userJoined(data) {
         this.$store.commit('addUser', data.user)
       },
-      gameUpdate() {
-
+      gameUpdate(data) {
+        console.log(data)
+        if (data.type === Constants.GAME_UPDATE_GAME_PHASE) {
+          this.$store.commit('updateGamePhase', data.payload.gamePhase)
+        }
       },
       gameActionRequest(data) {
         this.$store.dispatch('handleGameRequest', data)
