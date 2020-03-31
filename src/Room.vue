@@ -33,14 +33,7 @@
       >
         Prochaine carte
       </button>
-      <div class="board">
-        <Card
-          v-for="(card, index) in board"
-          :key="index"
-          :card="card"
-          class="card"
-        />
-      </div>
+      <Board :cards="board"/>
     </div>
   </div>
 </template>
@@ -52,10 +45,11 @@
   import Deal4 from '@/components/game/phases/deal4'
   import Card from '@/components/game/card'
   import Constants from '@/game/constants'
+  import Board from '@/components/Board'
 
   export default {
     name: 'Room',
-    components: { Card, Deal1, Deal2, Deal3, Deal4 },
+    components: { Board, Card, Deal1, Deal2, Deal3, Deal4 },
     data() {
       return {
         room: null,
@@ -110,7 +104,7 @@
           this.boardPtr++
         } else if (data.type === Constants.GAME_UPDATE_REMAINING_CARD) {
           this.remainingCards = data.payload.remainingCards
-          this.generateFakeBoard()
+          this.generateBoard()
         }
       },
       gameActionRequest(data) {
@@ -142,7 +136,7 @@
       showNextCard() {
         this.$socket.emit('getNextCard')
       },
-      generateFakeBoard() {
+      generateBoard() {
         // Generate fake board
         for (let i = 0; i < this.remainingCards; ++i) {
           this.board.push({ suit: Constants.CARD_SUIT_CLUB, value: 1, show: false })
