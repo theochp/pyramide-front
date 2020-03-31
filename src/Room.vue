@@ -26,6 +26,9 @@
       <deal2 v-if="gamePhase === constants.GAME_PHASE_DEAL_2"/>
       <deal3 v-if="gamePhase === constants.GAME_PHASE_DEAL_3"/>
       <deal4 v-if="gamePhase === constants.GAME_PHASE_DEAL_4"/>
+      <p v-if="countdown">
+        Vous avez {{ countdown }} secondes pour regarder vos cartes.
+      </p>
       <h2>Board</h2>
       <button
         v-if="showNextCardButton"
@@ -60,7 +63,8 @@
         username: null,
         board: [],
         boardPtr: 0,
-        remainingCards: 52
+        remainingCards: 52,
+        countdown: null,
       }
     },
     computed: {
@@ -81,7 +85,7 @@
       },
       showNextCardButton() {
         return this.isAdmin && this.$store.state.gamePhase === Constants.GAME_PHASE_PLAY
-      }
+      },
     },
     sockets: {
       joinRoomResponse(res) {
@@ -145,13 +149,28 @@
         for (let i = 0; i < this.remainingCards; ++i) {
           this.board.push({ suit: Constants.CARD_SUIT_CLUB, value: 1, show: false })
         }
-      }
+      },
+      hideCards() {
+        this.$store.commit('showCards')
+      },
     },
     watch: {
       gamePhase(newVal) {
         if (newVal === Constants.GAME_PHASE_REMEMBER_CARDS) {
-          alert('Remember your cards! ' + Constants.SECONDS_TO_REMEMBER + ' seconds.')
+          this.countdown = Constants.SECONDS_TO_REMEMBER
+          const countdownFn = () => setTimeout(() => {
+            if (this.countdown > 0) {
+              this.countdown--
+              countdownFn()
+            } else {
+              this.countdown = null
+              this.hideCards()
+            }
+          }, 1000)
+          countdownFn()
         } else if (newVal === Constants.GAME_PHASE_PLAY) {
+          this.countdown = null
+          this.hideCards()
           console.log('play started')
         }
       },

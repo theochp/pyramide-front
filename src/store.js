@@ -81,5 +81,11 @@ export default {
     setAdminToken(state, token) {
       state.adminToken = token
     },
+    showCards(state) {
+      state.cards[0].show = false
+      state.cards.forEach(card => {
+        card.show = false
+      })
+    }
   },
 }

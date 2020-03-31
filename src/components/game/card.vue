@@ -1,5 +1,5 @@
 <template>
-  <img :src="getPic()" :alt="imageName">
+  <img :src="imageSrc" :alt="imageName">
 </template>
 
 <script>
@@ -12,12 +12,10 @@
         required: true,
       },
     },
-    methods: {
-      getPic() {
+    computed: {
+      imageSrc() {
         return require('@/assets/cards/' + this.imageName + '.png')
       },
-    },
-    computed: {
       imageName() {
         if (this.card && this.card.show !== false) {
           let suit
