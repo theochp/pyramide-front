@@ -7,7 +7,8 @@ export default {
     responseTokens: new Map(),
     cards: [],
     sips: 0,
-    users: []
+    users: [],
+    adminToken: null
   },
   actions: {
     handleGameRequest(context, requestData) {
@@ -76,6 +77,9 @@ export default {
     },
     updateGamePhase(state, phase) {
       state.gamePhase = phase
-    }
+    },
+    setAdminToken(state, token) {
+      state.adminToken = token
+    },
   },
 }

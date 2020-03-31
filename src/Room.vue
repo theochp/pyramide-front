@@ -55,7 +55,7 @@
         room: null,
         roomId: null,
         joiningRoom: false,
-        isAdmin: true,
+        isAdmin: false,
         gameStarted: false,
         username: null,
         board: [],
@@ -76,9 +76,11 @@
       constants() {
         return Constants
       },
+      adminToken() {
+        return this.$store.state.adminToken
+      },
       showNextCardButton() {
-        // TODO: check if user is admin
-        return this.$store.state.gamePhase === Constants.GAME_PHASE_PLAY
+        return this.isAdmin && this.$store.state.gamePhase === Constants.GAME_PHASE_PLAY
       }
     },
     sockets: {
@@ -86,6 +88,7 @@
         if (res.success) {
           this.room = res.room
           this.joiningRoom = false
+          this.isAdmin = res.isAdmin
         } else {
           alert(res.message)
         }
@@ -130,6 +133,7 @@
           user: {
             name: this.username,
           },
+          adminToken: this.adminToken,
         })
         this.joiningRoom = true
       },

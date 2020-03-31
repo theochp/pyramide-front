@@ -31,6 +31,7 @@
     },
     sockets: {
       createRoomResponse(res) {
+        this.$store.commit('setAdminToken', res.token)
         this.$router.push('/room/' + res.roomId)
       },
       getRoomsResponse(res) {
