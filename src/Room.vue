@@ -27,6 +27,12 @@
       <deal3 v-if="gamePhase === constants.GAME_PHASE_DEAL_3"/>
       <deal4 v-if="gamePhase === constants.GAME_PHASE_DEAL_4"/>
       <h2>Board</h2>
+      <button
+        v-if="showNextCardButton"
+        @click="showNextCard"
+      >
+        Prochaine carte
+      </button>
       <div class="board">
         <Card
           v-for="(card, index) in board"
@@ -60,6 +66,7 @@
         username: null,
         board: [],
         boardPtr: 0,
+        remainingCards: 52
       }
     },
     computed: {
@@ -75,6 +82,10 @@
       constants() {
         return Constants
       },
+      showNextCardButton() {
+        // TODO: check if user is admin
+        return this.$store.state.gamePhase === Constants.GAME_PHASE_PLAY
+      }
     },
     sockets: {
       joinRoomResponse(res) {
@@ -97,6 +108,9 @@
           boardCard.value = data.payload.card.value
           boardCard.show = true
           this.boardPtr++
+        } else if (data.type === Constants.GAME_UPDATE_REMAINING_CARD) {
+          this.remainingCards = data.payload.remainingCards
+          this.generateFakeBoard()
         }
       },
       gameActionRequest(data) {
@@ -108,11 +122,6 @@
     },
     mounted() {
       this.roomId = this.$route.params.id
-
-      // Generate fake board
-      for (let i = 0; i < 52; ++i) {
-        this.board.push({ suit: Constants.CARD_SUIT_CLUB, value: 1, show: false })
-      }
     },
     methods: {
       startGame() {
@@ -130,6 +139,15 @@
         })
         this.joiningRoom = true
       },
+      showNextCard() {
+        this.$socket.emit('getNextCard')
+      },
+      generateFakeBoard() {
+        // Generate fake board
+        for (let i = 0; i < this.remainingCards; ++i) {
+          this.board.push({ suit: Constants.CARD_SUIT_CLUB, value: 1, show: false })
+        }
+      }
     },
     watch: {
       gamePhase(newVal) {
