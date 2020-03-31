@@ -15,13 +15,13 @@
     methods: {
       getPic() {
         return require('@/assets/cards/' + this.imageName + '.png')
-      }
+      },
     },
     computed: {
       imageName() {
-        if (this.card) {
+        if (this.card && this.card.show !== false) {
           let suit
-          switch(this.card.suit) {
+          switch (this.card.suit) {
             case Constants.CARD_SUIT_HEART:
               suit = 'H'
               break
@@ -38,7 +38,7 @@
           if (this.card.value >= 2 && this.card.value <= 10) {
             return this.card.value + suit
           } else {
-            switch(this.card.value) {
+            switch (this.card.value) {
               case 1:
                 return 'A' + suit
               case 11:
@@ -50,7 +50,8 @@
             }
           }
         }
-        return ''
+
+        return 'blue_back'
       },
     },
   }

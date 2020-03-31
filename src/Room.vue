@@ -12,7 +12,7 @@
       {{ sips }} gorgées
       Cartes:
       <ul class="cards">
-        <li v-for="card in cards" :key="card.suit+card.value">
+        <li v-for="(card, index) in cards" :key="index">
           <Card :card="card" class="card"/>
         </li>
       </ul>
@@ -28,7 +28,12 @@
       <deal4 v-if="gamePhase === constants.GAME_PHASE_DEAL_4"/>
       <h2>Board</h2>
       <div class="board">
-        <Card v-for="card in board" :card="card" :key="card.value+card.suit" class="card"/>
+        <Card
+          v-for="(card, index) in board"
+          :key="index"
+          :card="card"
+          class="card"
+        />
       </div>
     </div>
   </div>
@@ -53,7 +58,8 @@
         isAdmin: true,
         gameStarted: false,
         username: null,
-        board: []
+        board: [],
+        boardPtr: 0,
       }
     },
     computed: {
@@ -68,7 +74,7 @@
       },
       constants() {
         return Constants
-      }
+      },
     },
     sockets: {
       joinRoomResponse(res) {
@@ -86,7 +92,11 @@
         if (data.type === Constants.GAME_UPDATE_GAME_PHASE) {
           this.$store.commit('updateGamePhase', data.payload.gamePhase)
         } else if (data.type === Constants.GAME_UPDATE_NEW_CARD) {
-          this.board.push(data.payload.card)
+          const boardCard = this.board[this.boardPtr]
+          boardCard.suit = data.payload.card.suit
+          boardCard.value = data.payload.card.value
+          boardCard.show = true
+          this.boardPtr++
         }
       },
       gameActionRequest(data) {
@@ -98,6 +108,11 @@
     },
     mounted() {
       this.roomId = this.$route.params.id
+
+      // Generate fake board
+      for (let i = 0; i < 52; ++i) {
+        this.board.push({ suit: Constants.CARD_SUIT_CLUB, value: 1, show: false })
+      }
     },
     methods: {
       startGame() {
@@ -119,12 +134,12 @@
     watch: {
       gamePhase(newVal) {
         if (newVal === Constants.GAME_PHASE_REMEMBER_CARDS) {
-          alert('Remember your cards! ' + Constants.SECONDS_TO_REMEMBER +  ' seconds.')
+          alert('Remember your cards! ' + Constants.SECONDS_TO_REMEMBER + ' seconds.')
         } else if (newVal === Constants.GAME_PHASE_PLAY) {
           console.log('play started')
         }
-      }
-    }
+      },
+    },
   }
 </script>
 
@@ -143,6 +158,7 @@
       list-style: none;
     }
   }
+
   .board {
     .card {
       width: 100px;
