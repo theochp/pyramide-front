@@ -13,7 +13,7 @@ Vue.use(Vuex)
 const vuexStore = new Vuex.Store(store)
 
 Vue.use(new VueSocketIO({
-  debug: true,
+  debug: process.env.NODE_ENV === 'development',
   connection: 'http://localhost:3001',
   vuex: {
     vuexStore,
