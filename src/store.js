@@ -12,6 +12,7 @@ export default {
     responseTokens: new Map(),
     cards: [],
     sips: 0,
+    users: []
   },
   actions: {
     handleGameRequest(context, requestData) {
@@ -80,5 +81,8 @@ export default {
     addSips(state, sips) {
       state.sips += sips
     },
+    addUser(state, user) {
+      state.users.push(user)
+    }
   },
 }
