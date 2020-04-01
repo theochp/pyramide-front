@@ -3,6 +3,8 @@
 ## Project setup
 ```
 yarn install
+
+export VUE_APP_SERVER_ADDR='http://localhost:3000'
 ```
 
 ### Compiles and hot-reloads for development

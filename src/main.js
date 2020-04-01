@@ -14,7 +14,7 @@ const vuexStore = new Vuex.Store(store)
 
 Vue.use(new VueSocketIO({
   debug: process.env.NODE_ENV === 'development',
-  connection: 'http://localhost:3001',
+  connection: process.env.VUE_APP_SERVER_ADDR,
   vuex: {
     vuexStore,
     actionPrefix: 'SOCKET_',
