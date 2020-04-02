@@ -1,6 +1,7 @@
 <template>
   <div class="game">
     <div class="players">
+      <h2>Joueurs</h2>
       <ul>
         <li>{{ user.name }}</li>
         <li v-for="(player,idx) in players" :key="idx">{{ player.name }}</li>
@@ -14,14 +15,13 @@
       </form>
     </div>
     <div v-else class="room">
-      <img src="@/assets/cards/back_cards-07.png" alt="back cards" width="300" height="auto">
       {{ game.sips }} gorgées
-      Cartes:
-      <ul class="cards">
-        <li v-for="(card, index) in game.cards" :key="index">
-          <Card :card="card" class="card" @click="onCardClick(index)"/>
-        </li>
-      </ul>
+      <div class="cards">
+        <Card :card="game.cards[0]" class="card" @click="onCardClick(0)"/>
+        <Card :card="game.cards[1]" class="card" @click="onCardClick(1)"/>
+        <Card :card="game.cards[2]" class="card" @click="onCardClick(2)"/>
+        <Card :card="game.cards[3]" class="card" @click="onCardClick(3)"/>
+      </div>
       <button
         v-if="isAdmin && !gameStarted"
         @click="startDeal"
@@ -213,18 +213,51 @@
 </script>
 
 <style scoped lang="scss">
+  #app {
+    height: 100%;
+  }
+
+  .players {
+    position: absolute;
+    top: 20%;
+    left: 0;
+    width: 150px;
+    min-height: 300px;
+    background-color: grey;
+  }
+
   .cards {
-    min-height: 200px;
-    text-align: left;
+    $card-width: 130px;
+    $card-height: 200px;
+    $padding: 30px;
+    $card-margin: 15px;
+    $block-width: $card-width * 4 + 3 * $card-margin;
+    position: absolute;
+    width: $block-width;
+    height: auto;
+    min-height: 100px;
+    left: calc(50% - (#{$block-width} / 2 + #{$padding}));
+    bottom: 0;
+
+    padding: 30px $padding;
+
+    background-color: #5A250F;
+
+    color: #fff;
+
+    li {
+      & + li {
+        margin-left: 15px;
+      }
+    }
 
     .card {
-      width: auto;
-      height: 200px;
+      width: $card-width;
+      height: $card-height;
     }
 
     li {
       display: inline-block;
-      list-style: none;
     }
   }
 
