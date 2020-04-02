@@ -1,5 +1,11 @@
 <template>
   <div class="game">
+    <div class="players">
+      <ul>
+        <li>{{ username }}</li>
+        <li v-for="(player,idx) in players" :key="idx">{{ player.name }}</li>
+      </ul>
+    </div>
     <div v-if="!room">
       <form action="">
         <label for="usernameInput">Pseudonyme</label>
@@ -65,6 +71,7 @@
         boardPtr: 0,
         remainingCards: 52,
         countdown: null,
+        players: [],
       }
     },
     computed: {
@@ -112,6 +119,8 @@
         } else if (data.type === Constants.GAME_UPDATE_REMAINING_CARD) {
           this.remainingCards = data.payload.remainingCards
           this.generateBoard()
+        } else if (data.type === Constants.GAME_UPDATE_USER_JOINED) {
+          this.players.push(data.user)
         }
       },
       gameActionRequest(data) {
