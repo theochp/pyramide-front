@@ -34,10 +34,10 @@
       >
         Démarrer le jeu
       </button>
-      <deal1 v-if="game.phase === constants.GAME_PHASE_DEAL_1"/>
-      <deal2 v-if="game.phase === constants.GAME_PHASE_DEAL_2"/>
-      <deal3 v-if="game.phase === constants.GAME_PHASE_DEAL_3"/>
-      <deal4 v-if="game.phase === constants.GAME_PHASE_DEAL_4"/>
+      <deal1 v-if="showDeal[1] && game.cards.length === 0"/>
+      <deal2 v-if="showDeal[2] && game.cards.length === 1"/>
+      <deal3 v-if="showDeal[3] && game.cards.length === 2"/>
+      <deal4 v-if="showDeal[4] && game.cards.length === 3"/>
       <h2>Board</h2>
       <button
         v-if="showNextCardButton"
@@ -78,6 +78,12 @@
         user: {
           id: null,
           name: null,
+        },
+        showDeal: {
+          1: false,
+          2: false,
+          3: false,
+          4: false,
         },
         room: null,
         roomId: null,
@@ -142,7 +148,22 @@
         }
       },
       gameActionRequest(data) {
-        this.$store.dispatch('handleGameRequest', data)
+        const request = data['gameRequest']
+
+        if (request === Constants.GAME_REQUEST_DEAL_1) {
+          this.showDeal[1] = true
+        } else if (request === Constants.GAME_REQUEST_DEAL_2) {
+          this.showDeal[2] = true
+        } else if (request === Constants.GAME_REQUEST_DEAL_3) {
+          this.showDeal[3] = true
+        } else if (request === Constants.GAME_REQUEST_DEAL_4) {
+          this.showDeal[4] = true
+        }
+
+        this.$store.commit('addResponseToken', {
+          key: request,
+          value: data['responseToken'],
+        })
       },
       gameActionResponse(res) {
         const response = res['gameResponse']
