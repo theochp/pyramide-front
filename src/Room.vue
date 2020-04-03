@@ -2,14 +2,14 @@
   <div class="game">
     <div class="players">
       <ul>
-        <li>{{ username }}</li>
+        <li>{{ user.name }}</li>
         <li v-for="(player,idx) in players" :key="idx">{{ player.name }}</li>
       </ul>
     </div>
     <div v-if="!room">
       <form action="">
         <label for="usernameInput">Pseudonyme</label>
-        <input id="usernameInput" type="text" v-model="username" name="username">
+        <input id="usernameInput" type="text" v-model="user.name" name="username">
         <input type="submit" value="Rejoindre" @click.prevent="joinRoom">
       </form>
     </div>
@@ -69,11 +69,14 @@
           sips: 0,
           cards: [],
         },
+        user: {
+          id: null,
+          name: null,
+        },
         room: null,
         roomId: null,
         isAdmin: false,
         gameStarted: false,
-        username: null,
         board: [],
         boardPtr: 0,
         remainingCards: 52,
@@ -119,7 +122,7 @@
         } else if (update.type === Constants.GAME_UPDATE_USER_JOINED) {
           this.players.push(update.user)
         } else if (update.type === Constants.GAME_UPDATE_USER_SHOW_CARD) {
-          const player = this.players.find(p => p.name === update.user.name) // TODO: use user id
+          const player = this.players.find(p => p.id === update.user.id) // TODO: use user id
           if (player) {
             player.cards[update.cardIdx].suit = update.card.suit
             player.cards[update.cardIdx].value = update.card.value
@@ -127,7 +130,7 @@
           this.showCard(player.cards[update.cardIdx], 4)
         } else if(update.type === Constants.GAME_UPDATE_CARD_DEALT) {
           console.log(update)
-          const player = this.players.find(p => p.name === update.payload.user.name) // TODO: use user id
+          const player = this.players.find(p => p.id === update.payload.user.id) // TODO: use user id
           if (player) {
             player.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
           }
@@ -171,7 +174,7 @@
         this.$socket.emit('joinRoom', {
           roomId: this.roomId,
           user: {
-            name: this.username,
+            name: this.user.name,
           },
           adminToken: this.$store.state.adminToken,
         })
