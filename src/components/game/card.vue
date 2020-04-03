@@ -1,5 +1,5 @@
 <template>
-  <img :src="imageSrc" :alt="imageName" @click="$emit('click', $event)">
+  <img v-if="card" :src="imageSrc" :alt="imageName" @click="$emit('click', $event)"/>
 </template>
 
 <script>
@@ -11,6 +11,12 @@
       card: {
         required: true,
       },
+    },
+    watch: {
+      handler: (newVal) => {
+        console.log('card',newVal)
+      },
+      deep: true,
     },
     computed: {
       imageSrc() {
