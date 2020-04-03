@@ -2,9 +2,15 @@
   <div class="game">
     <div class="players">
       <h2>Joueurs</h2>
-      <ul>
-        <li>{{ user.name }}</li>
-        <li v-for="(player,idx) in players" :key="idx">{{ player.name }}</li>
+      <ul class="player-list">
+        <li v-for="(player,idx) in players" :key="idx">
+          <p class="player-name">
+            {{ player.name }}
+          </p>
+          <div class="player-cards">
+            <Card :card="card" v-for="(card,idx) in player.cards" :key="idx" class="player-card"/>
+          </div>
+        </li>
       </ul>
     </div>
     <div v-if="!room">
@@ -16,12 +22,6 @@
     </div>
     <div v-else class="room">
       {{ game.sips }} gorgées
-      <div class="cards">
-        <Card :card="game.cards[0]" class="card" @click="onCardClick(0)"/>
-        <Card :card="game.cards[1]" class="card" @click="onCardClick(1)"/>
-        <Card :card="game.cards[2]" class="card" @click="onCardClick(2)"/>
-        <Card :card="game.cards[3]" class="card" @click="onCardClick(3)"/>
-      </div>
       <button
         v-if="isAdmin && !gameStarted"
         @click="startDeal"
@@ -45,7 +45,13 @@
       >
         Prochaine carte
       </button>
-      <Board :cards="board"/>
+      <Board :cards="board" class="board"/>
+      <div class="cards">
+        <Card :card="game.cards[0]" class="card" @click="onCardClick(0)"/>
+        <Card :card="game.cards[1]" class="card" @click="onCardClick(1)"/>
+        <Card :card="game.cards[2]" class="card" @click="onCardClick(2)"/>
+        <Card :card="game.cards[3]" class="card" @click="onCardClick(3)"/>
+      </div>
     </div>
   </div>
 </template>
@@ -122,17 +128,16 @@
         } else if (update.type === Constants.GAME_UPDATE_USER_JOINED) {
           this.players.push(update.user)
         } else if (update.type === Constants.GAME_UPDATE_USER_SHOW_CARD) {
-          const player = this.players.find(p => p.id === update.user.id) // TODO: use user id
+          const player = this.players.find(p => p.id === update.user.id)
           if (player) {
             player.cards[update.cardIdx].suit = update.card.suit
             player.cards[update.cardIdx].value = update.card.value
+            this.showCard(player.cards[update.cardIdx], 4)
           }
-          this.showCard(player.cards[update.cardIdx], 4)
-        } else if(update.type === Constants.GAME_UPDATE_CARD_DEALT) {
-          console.log(update)
-          const player = this.players.find(p => p.id === update.payload.user.id) // TODO: use user id
+        } else if (update.type === Constants.GAME_UPDATE_CARD_DEALT) {
+          const player = this.players.find(p => p.id === update.payload.user.id)
           if (player) {
-            player.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
+            player.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0, show: false })
           }
         }
       },
@@ -199,7 +204,9 @@
       },
       showCard(card, duration) {
         card.show = true
-        setTimeout(() => card.show = false, duration * 1000)
+        setTimeout(() => {
+          card.show = false
+        }, duration * 1000)
       },
     },
     watch: {
@@ -219,27 +226,55 @@
 
   .players {
     position: absolute;
-    top: 20%;
+    top: 30px;
     left: 0;
-    width: 150px;
+    width: 300px;
     min-height: 300px;
     background-color: grey;
+
+    .player-list {
+      font-weight: bold;
+      color: white;
+      font-size: 30px;
+
+      li {
+        border-top: 2px solid white;
+        border-bottom: 2px solid white;
+        margin: 10px;
+      }
+
+      .player-name {
+        margin: 5px;
+
+        &.self {
+          font-style: italic;
+        }
+      }
+
+      .player-cards {
+        .player-card {
+          width: auto;
+          height: 90px;
+        }
+      }
+    }
+  }
+
+  .board {
+    margin-bottom: 300px;
   }
 
   .cards {
     $card-width: 130px;
     $card-height: 200px;
-    $padding: 30px;
-    $card-margin: 15px;
-    $block-width: $card-width * 4 + 3 * $card-margin;
-    position: absolute;
-    width: $block-width;
+    position: fixed;
+    right: 0;
+    left: 0;
+    bottom: 0;
     height: auto;
     min-height: 100px;
-    left: calc(50% - (#{$block-width} / 2 + #{$padding}));
-    bottom: 0;
 
-    padding: 30px $padding;
+    padding: 30px;
 
     background-color: #5A250F;
 

@@ -12,6 +12,12 @@
         required: true,
       },
     },
+    watch: {
+      handler: (newVal) => {
+        console.log('card',newVal)
+      },
+      deep: true,
+    },
     computed: {
       imageSrc() {
         return require('@/assets/cards/' + this.imageName + '.png')
