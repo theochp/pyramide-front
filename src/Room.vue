@@ -24,9 +24,15 @@
       </ul>
       <button
         v-if="isAdmin && !gameStarted"
+        @click="startDeal"
+      >
+        Démarrer la distribution
+      </button>
+      <button
+        v-if="isAdmin && showStartButton"
         @click="startGame"
       >
-        Démarrer la partie
+        Démarrer le jeu
       </button>
       <deal1 v-if="gamePhase === constants.GAME_PHASE_DEAL_1"/>
       <deal2 v-if="gamePhase === constants.GAME_PHASE_DEAL_2"/>
@@ -93,6 +99,9 @@
       showNextCardButton() {
         return this.isAdmin && this.$store.state.gamePhase === Constants.GAME_PHASE_PLAY
       },
+      showStartButton() {
+        return this.gamePhase === Constants.GAME_PHASE_REMEMBER_CARDS
+      }
     },
     sockets: {
       joinRoomResponse(res) {
@@ -145,10 +154,16 @@
       this.roomId = this.$route.params.id
     },
     methods: {
-      startGame() {
+      startDeal() {
         this.gameStarted = true
         this.$socket.emit('startGame', {
           roomId: this.roomId,
+        })
+      },
+      startGame() {
+        this.gameStarted = true
+        this.$socket.emit('gameAction', {
+          type: Constants.GAME_ACTION_START_PLAY
         })
       },
       joinRoom() {
