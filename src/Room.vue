@@ -15,10 +15,10 @@
     </div>
     <div v-else class="room">
       <img src="@/assets/cards/back_cards-07.png" alt="back cards" width="300" height="auto">
-      {{ sips }} gorgées
+      {{ game.sips }} gorgées
       Cartes:
       <ul class="cards">
-        <li v-for="(card, index) in cards" :key="index">
+        <li v-for="(card, index) in game.cards" :key="index">
           <Card :card="card" class="card" @click="onCardClick(index)"/>
         </li>
       </ul>
@@ -34,13 +34,10 @@
       >
         Démarrer le jeu
       </button>
-      <deal1 v-if="gamePhase === constants.GAME_PHASE_DEAL_1"/>
-      <deal2 v-if="gamePhase === constants.GAME_PHASE_DEAL_2"/>
-      <deal3 v-if="gamePhase === constants.GAME_PHASE_DEAL_3"/>
-      <deal4 v-if="gamePhase === constants.GAME_PHASE_DEAL_4"/>
-      <p v-if="countdown">
-        Vous avez {{ countdown }} secondes pour regarder vos cartes.
-      </p>
+      <deal1 v-if="game.phase === constants.GAME_PHASE_DEAL_1"/>
+      <deal2 v-if="game.phase === constants.GAME_PHASE_DEAL_2"/>
+      <deal3 v-if="game.phase === constants.GAME_PHASE_DEAL_3"/>
+      <deal4 v-if="game.phase === constants.GAME_PHASE_DEAL_4"/>
       <h2>Board</h2>
       <button
         v-if="showNextCardButton"
@@ -67,58 +64,48 @@
     components: { Board, Card, Deal1, Deal2, Deal3, Deal4 },
     data() {
       return {
+        game: {
+          phase: null,
+          sips: 0,
+          cards: [],
+        },
         room: null,
         roomId: null,
-        joiningRoom: false,
         isAdmin: false,
         gameStarted: false,
         username: null,
         board: [],
         boardPtr: 0,
         remainingCards: 52,
-        countdown: null,
         players: [],
       }
     },
     computed: {
-      gamePhase() {
-        return this.$store.state.gamePhase
-      },
-      sips() {
-        return this.$store.state.sips
-      },
-      cards() {
-        return this.$store.state.cards
-      },
       constants() {
         return Constants
       },
-      adminToken() {
-        return this.$store.state.adminToken
-      },
       showNextCardButton() {
-        return this.isAdmin && this.$store.state.gamePhase === Constants.GAME_PHASE_PLAY
+        return this.isAdmin && this.gamePhase === Constants.GAME_PHASE_PLAY
       },
       showStartButton() {
         return this.gamePhase === Constants.GAME_PHASE_REMEMBER_CARDS
-      }
+      },
+      gamePhase() {
+        return this.game.phase
+      },
     },
     sockets: {
       joinRoomResponse(res) {
         if (res.success) {
           this.room = res.room
-          this.joiningRoom = false
           this.isAdmin = res.isAdmin
         } else {
           alert(res.message)
         }
       },
-      userJoined(data) {
-        this.$store.commit('addUser', data.user)
-      },
       gameUpdate(data) {
         if (data.type === Constants.GAME_UPDATE_GAME_PHASE) {
-          this.$store.commit('updateGamePhase', data.payload.gamePhase)
+          this.game.phase = data.payload.gamePhase
         } else if (data.type === Constants.GAME_UPDATE_NEW_CARD) {
           const boardCard = this.board[this.boardPtr]
           boardCard.suit = data.payload.card.suit
@@ -130,10 +117,10 @@
           this.generateBoard()
         } else if (data.type === Constants.GAME_UPDATE_USER_JOINED) {
           // TODO: refactor
-          data.user.cards.push({suit: Constants.CARD_SUIT_UNKNOWN, value: 0})
-          data.user.cards.push({suit: Constants.CARD_SUIT_UNKNOWN, value: 0})
-          data.user.cards.push({suit: Constants.CARD_SUIT_UNKNOWN, value: 0})
-          data.user.cards.push({suit: Constants.CARD_SUIT_UNKNOWN, value: 0})
+          data.user.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
+          data.user.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
+          data.user.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
+          data.user.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
           this.players.push(data.user)
         } else if (data.type === Constants.GAME_UPDATE_USER_SHOW_CARD) {
           const player = this.players.find(p => p.name === data.user.name) // TODO: use user id
@@ -146,8 +133,19 @@
       gameActionRequest(data) {
         this.$store.dispatch('handleGameRequest', data)
       },
-      gameActionResponse(data) {
-        this.$store.dispatch('handleGameResponse', data)
+      gameActionResponse(res) {
+        const response = res['gameResponse']
+        const data = res['data']
+
+        switch (response) {
+          case Constants.GAME_RESPONSE_DEAL_1:
+          case Constants.GAME_RESPONSE_DEAL_2:
+          case Constants.GAME_RESPONSE_DEAL_3:
+          case Constants.GAME_RESPONSE_DEAL_4:
+            this.game.cards.push(data['card'])
+            this.game.sips += data['sips']
+            break
+        }
       },
     },
     mounted() {
@@ -163,7 +161,7 @@
       startGame() {
         this.gameStarted = true
         this.$socket.emit('gameAction', {
-          type: Constants.GAME_ACTION_START_PLAY
+          type: Constants.GAME_ACTION_START_PLAY,
         })
       },
       joinRoom() {
@@ -172,9 +170,8 @@
           user: {
             name: this.username,
           },
-          adminToken: this.adminToken,
+          adminToken: this.$store.state.adminToken,
         })
-        this.joiningRoom = true
       },
       showNextCard() {
         this.$socket.emit('getNextCard')
@@ -186,7 +183,9 @@
         }
       },
       hideCards() {
-        this.$store.commit('showCards')
+        this.game.cards.forEach(card => {
+          card.show = false
+        })
       },
       onCardClick(cardIdx) {
         this.$socket.emit('showCard', { cardIdx })
@@ -195,26 +194,12 @@
       showCard(card, duration) {
         card.show = true
         setTimeout(() => card.show = false, duration * 1000)
-      }
+      },
     },
     watch: {
       gamePhase(newVal) {
-        if (newVal === Constants.GAME_PHASE_REMEMBER_CARDS) {
-          this.countdown = Constants.SECONDS_TO_REMEMBER
-          const countdownFn = () => setTimeout(() => {
-            if (this.countdown > 0) {
-              this.countdown--
-              countdownFn()
-            } else {
-              this.countdown = null
-              this.hideCards()
-            }
-          }, 1000)
-          countdownFn()
-        } else if (newVal === Constants.GAME_PHASE_PLAY) {
-          this.countdown = null
+        if (newVal === Constants.GAME_PHASE_PLAY) {
           this.hideCards()
-          console.log('play started')
         }
       },
     },
