@@ -98,36 +98,39 @@
       joinRoomResponse(res) {
         if (res.success) {
           this.room = res.room
+          this.players = res.players
           this.isAdmin = res.isAdmin
         } else {
           alert(res.message)
         }
       },
-      gameUpdate(data) {
-        if (data.type === Constants.GAME_UPDATE_GAME_PHASE) {
-          this.game.phase = data.payload.gamePhase
-        } else if (data.type === Constants.GAME_UPDATE_NEW_CARD) {
+      gameUpdate(update) {
+        if (update.type === Constants.GAME_UPDATE_GAME_PHASE) {
+          this.game.phase = update.payload.gamePhase
+        } else if (update.type === Constants.GAME_UPDATE_NEW_CARD) {
           const boardCard = this.board[this.boardPtr]
-          boardCard.suit = data.payload.card.suit
-          boardCard.value = data.payload.card.value
+          boardCard.suit = update.payload.card.suit
+          boardCard.value = update.payload.card.value
           boardCard.show = true
           this.boardPtr++
-        } else if (data.type === Constants.GAME_UPDATE_REMAINING_CARD) {
-          this.remainingCards = data.payload.remainingCards
+        } else if (update.type === Constants.GAME_UPDATE_REMAINING_CARD) {
+          this.remainingCards = update.payload.remainingCards
           this.generateBoard()
-        } else if (data.type === Constants.GAME_UPDATE_USER_JOINED) {
-          // TODO: refactor
-          data.user.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
-          data.user.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
-          data.user.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
-          data.user.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
-          this.players.push(data.user)
-        } else if (data.type === Constants.GAME_UPDATE_USER_SHOW_CARD) {
-          const player = this.players.find(p => p.name === data.user.name) // TODO: use user id
-
-          player.cards[data.cardIdx].suit = data.card.suit
-          player.cards[data.cardIdx].value = data.card.value
-          this.showCard(player.cards[data.cardIdx], 4)
+        } else if (update.type === Constants.GAME_UPDATE_USER_JOINED) {
+          this.players.push(update.user)
+        } else if (update.type === Constants.GAME_UPDATE_USER_SHOW_CARD) {
+          const player = this.players.find(p => p.name === update.user.name) // TODO: use user id
+          if (player) {
+            player.cards[update.cardIdx].suit = update.card.suit
+            player.cards[update.cardIdx].value = update.card.value
+          }
+          this.showCard(player.cards[update.cardIdx], 4)
+        } else if(update.type === Constants.GAME_UPDATE_CARD_DEALT) {
+          console.log(update)
+          const player = this.players.find(p => p.name === update.payload.user.name) // TODO: use user id
+          if (player) {
+            player.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0 })
+          }
         }
       },
       gameActionRequest(data) {
@@ -189,7 +192,7 @@
       },
       onCardClick(cardIdx) {
         this.$socket.emit('showCard', { cardIdx })
-        this.showCard(this.cards[cardIdx], 3)
+        this.showCard(this.game.cards[cardIdx], 3)
       },
       showCard(card, duration) {
         card.show = true
