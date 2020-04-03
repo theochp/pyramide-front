@@ -19,7 +19,7 @@
       Cartes:
       <ul class="cards">
         <li v-for="(card, index) in cards" :key="index">
-          <Card :card="card" class="card"/>
+          <Card :card="card" class="card" @click="onCardClick(index)"/>
         </li>
       </ul>
       <button
@@ -120,7 +120,18 @@
           this.remainingCards = data.payload.remainingCards
           this.generateBoard()
         } else if (data.type === Constants.GAME_UPDATE_USER_JOINED) {
+          // TODO: refactor
+          data.user.cards.push({suit: Constants.CARD_SUIT_UNKNOWN, value: 0})
+          data.user.cards.push({suit: Constants.CARD_SUIT_UNKNOWN, value: 0})
+          data.user.cards.push({suit: Constants.CARD_SUIT_UNKNOWN, value: 0})
+          data.user.cards.push({suit: Constants.CARD_SUIT_UNKNOWN, value: 0})
           this.players.push(data.user)
+        } else if (data.type === Constants.GAME_UPDATE_USER_SHOW_CARD) {
+          const player = this.players.find(p => p.name === data.user.name) // TODO: use user id
+
+          player.cards[data.cardIdx].suit = data.card.suit
+          player.cards[data.cardIdx].value = data.card.value
+          this.showCard(player.cards[data.cardIdx], 4)
         }
       },
       gameActionRequest(data) {
@@ -162,6 +173,14 @@
       hideCards() {
         this.$store.commit('showCards')
       },
+      onCardClick(cardIdx) {
+        this.$socket.emit('showCard', { cardIdx })
+        this.showCard(this.cards[cardIdx], 3)
+      },
+      showCard(card, duration) {
+        card.show = true
+        setTimeout(() => card.show = false, duration * 1000)
+      }
     },
     watch: {
       gamePhase(newVal) {
