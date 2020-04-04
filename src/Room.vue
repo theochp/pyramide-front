@@ -143,7 +143,13 @@
         } else if (update.type === Constants.GAME_UPDATE_CARD_DEALT) {
           const player = this.players.find(p => p.id === update.payload.user.id)
           if (player) {
-            player.cards.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0, show: false })
+            const card = {
+              suit: update.payload.card.suit,
+              value: update.payload.card.value,
+              show: true,
+            }
+            player.cards.push(card)
+            setTimeout(() => card.show = false, 5000)
           }
         }
       },
