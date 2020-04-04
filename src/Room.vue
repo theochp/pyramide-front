@@ -149,7 +149,6 @@
               show: true,
             }
             player.cards.push(card)
-            setTimeout(() => card.show = false, 5000)
           }
         }
       },
