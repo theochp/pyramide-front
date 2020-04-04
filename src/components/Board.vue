@@ -1,7 +1,9 @@
 <template>
   <div>
     <div v-for="i in nRows" class="board-row" :key="'br'+i">
-      <Card v-for="(card, idx) in getRowCards(i)" class="board-card" :key="'bc'+idx" :card="card"/>
+      <div class="cards">
+        <Card v-for="(card, idx) in getRowCards(nRows - i + 1)" class="board-card" :key="'bc'+idx" :card="card"/>
+      </div>
     </div>
   </div>
 </template>
@@ -59,7 +61,10 @@
 <style scoped lang="scss">
   .board-row {
     text-align: center;
-    direction: rtl;
+    .cards {
+      display: inline-block;
+      direction: rtl;
+    }
   }
 
   .board-card {

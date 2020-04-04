@@ -217,7 +217,7 @@
       generateBoard() {
         // Generate fake board
         for (let i = 0; i < this.remainingCards; ++i) {
-          this.board.push({ suit: Constants.CARD_SUIT_CLUB, value: 1, show: false })
+          this.board.push({ suit: Constants.CARD_SUIT_UNKNOWN, value: 0, show: false })
         }
       },
       hideCards() {
@@ -255,8 +255,9 @@
     position: absolute;
     top: 30px;
     left: 0;
-    width: 300px;
-    min-height: 300px;
+    width: 20%;
+    max-width: 250px;
+    min-height: 50%;
     background-color: grey;
 
     .player-list {
@@ -280,8 +281,8 @@
 
       .player-cards {
         .player-card {
-          width: auto;
-          height: 90px;
+          width: 25%;
+          height: auto;
         }
       }
     }
@@ -295,13 +296,11 @@
     $card-width: 130px;
     $card-height: 200px;
     position: fixed;
-    right: 0;
-    left: 0;
+    right: 10%;
+    left: 10%;
     bottom: 0;
-    height: auto;
-    min-height: 100px;
-
-    padding: 30px;
+    height: 20%;
+    padding: 10px 0;
 
     background-color: #5A250F;
 
@@ -314,8 +313,9 @@
     }
 
     .card {
-      width: $card-width;
-      height: $card-height;
+      width: auto;
+      max-width: 25%;
+      height: 100%;
     }
 
     li {
